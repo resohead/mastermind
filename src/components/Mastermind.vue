@@ -28,8 +28,8 @@
   </form>
 
   <div>
-    <button @click="reveal" class="mt-4 text-sm text-underline text-blue-500 font-bold">Show hint</button>
-    <p v-if="revealed" class="text-small">{{ this.secretWord }}</p>
+    <button @click="showHint" class="mt-4 text-sm text-underline text-blue-500 font-bold">Show hint</button>
+    <p v-if="needsHint" class="text-small">{{ this.remainingWords }}</p>
   </div>
 
   <div>
@@ -55,13 +55,17 @@ export default {
     return {
       answer: '',
       answers: [],
-      revealed: false
+      revealed: false,
+      needsHint: false
     };
   },
 
   methods: {
     reveal() {
       this.revealed = !this.revealed
+    },
+    showHint() {
+      this.needsHint = !this.needsHint
     },
     submit() {
       if (this.$refs.form.checkValidity()) {
@@ -105,6 +109,12 @@ export default {
     },
     isCorrect() {
       return this.lastGuess?.value.toUpperCase() === this.secretWord
+    },
+    remainingWords() {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      const used = this.answers.map(({characters}) => characters).flat()
+
+      return alphabet.split('').filter(x => !used.includes(x));
     }
   }
 }
