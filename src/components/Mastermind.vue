@@ -1,6 +1,6 @@
 <template>
 
-  <div class="space-y-1 overflow-hidden overflow-y-auto h-96" id="scoreboard" ref="scoreboard">
+  <div class="space-y-1 overflow-hidden overflow-y-auto max-h-96" id="scoreboard" ref="scoreboard">
     <ul v-if="answers.length === 0" class="flex items-center justify-center">
       <li>
         <WordTile :value="this.secretWord[0]" :correct="true" :exists="true"/>
