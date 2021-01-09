@@ -22,7 +22,7 @@
 
   <form ref="form" @submit.prevent="submit">
     <input type="text" :minlength="this.secretWord.length"  :maxlength="this.secretWord.length" v-model="answer"
-      class="p-4 mt-8 flex justify-center items-center shadow-sm border-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md"
+      class="uppercase p-4 mt-8 flex justify-center items-center shadow-sm border-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md"
       placeholder=""
     />
   </form>
