@@ -1,8 +1,8 @@
 <template>
    <ul v-for="game in history" :key="game.id" class="text-white">
        <li>
-           <span>{{ game.word }}, Completed: {{ game.completed }}</span>
-           <span>{{ game.attempts }} in {{ game.time }} seconds</span>
+           <span class="font-bold">{{ game.word }}</span>
+           <span> used {{ game.attempts }} attempts in {{ game.time }} seconds</span>
        </li>
    </ul>
 </template>

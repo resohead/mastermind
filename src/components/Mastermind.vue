@@ -19,7 +19,7 @@
   <div class="mt-8">
     <form v-show="playing" ref="form" @submit.prevent="submit">
       <input id="input" ref="input" type="text"
-        autofocus autocomplete="off"
+        autofocus autocomplete="off" required
         :minlength="this.secretWord.length"  :maxlength="this.secretWord.length" v-model="answer"
         class="tracking-widest text-2xl uppercase text-center p-4 justify-center items-center shadow-sm focus:outline-none border-blue-500 focus:border-blue-500 block w-full rounded-md"
         placeholder=""
@@ -29,7 +29,7 @@
     <button v-show="!playing" @click="start"
       type="button"
       class="uppercase items-center text-center px-6 py-3 border border-transparent text-2xl font-medium w-full rounded-md shadow-sm text-blue-500 bg-white hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-    Start
+      {{ history.length > 0 ? 'Play again' : 'Start' }}
     </button>
   </div>
 
@@ -60,10 +60,11 @@
     </div>
   </div>
 
-  <h2 v-show="isCorrect" class="text-white">CORRECT</h2>
+  <p class="hidden">{{ isCorrect }}</p>
 
-  <GameHistory :history="history" />
-
+  <div class="mt-4">
+    <GameHistory :history="history" />
+  </div>
 </template>
 
 <script>
@@ -142,7 +143,10 @@ export default {
     reset() {
       this.getNewWord()
       this.answers = []
+      this.revealed = false
+      this.needsHint = false
       this.time = 0
+      this.playing = false
     },
     saveGameHistory(stats = {}) {
       this.history.push(stats)
@@ -170,8 +174,6 @@ export default {
         const scoreboard = this.$refs.scoreboard
         scoreboard.scrollTop = scoreboard.scrollHeight - scoreboard.clientHeight;
       })
-
-
     },
     check(answer) {
       let results = []
@@ -207,7 +209,8 @@ export default {
       return this.answers[this.answers.length - 1]
     },
     isCorrect() {
-      const isCorrect = this.lastGuess?.value.toUpperCase() === this.secretWord
+      console.log('in isCorrect')
+      let isCorrect = this.lastGuess?.value.toUpperCase() === this.secretWord
       if (isCorrect){
         this.completedGame()
       }
