@@ -1,7 +1,7 @@
 <template>
 
   <div class="space-y-1 overflow-hidden overflow-y-auto max-h-96" id="scoreboard" ref="scoreboard">
-    <ul v-if="answers.length === 0" class="flex items-center justify-center">
+    <ul v-if="answers.length === 0" class="flex items-center justify-center space-x-2">
       <li>
         <WordTile :value="this.secretWord[0]" :correct="true" :exists="true"/>
       </li>
@@ -9,13 +9,9 @@
         <WordTile value="." :correct="false" :exists="false"/>
       </li>
     </ul>
-    <ul V-else class="flex items-center justify-center"
-      v-for="answer in answers" :key="answer.id">
-      <li>
-        <WordTile v-for="char in check(answer)" :key="char.index"
-          :value="char.answerChar"
-          :correct="char.correct" :exists="char.exists"
-        />
+    <ul V-else v-for="answer in answers" :key="answer.id" class="flex items-center justify-center space-x-2">
+      <li v-for="char in check(answer)" :key="char.index">
+        <WordTile :value="char.answerChar" :correct="char.correct" :exists="char.exists" />
       </li>
     </ul>
   </div>
