@@ -1,6 +1,6 @@
 <template>
 
-  <div class="space-y-1 overflow-hidden overflow-y-auto max-h-96" id="scoreboard" ref="scoreboard">
+  <div v-show="playing" class="space-y-1 overflow-hidden overflow-y-auto max-h-96" id="scoreboard" ref="scoreboard">
     <ul v-if="answers.length === 0" class="flex items-center justify-center space-x-2">
       <li>
         <WordTile :value="this.secretWord[0]" :correct="true" :exists="true"/>
@@ -16,34 +16,60 @@
     </ul>
   </div>
 
-  <form ref="form" @submit.prevent="submit">
-    <input type="text" :minlength="this.secretWord.length"  :maxlength="this.secretWord.length" v-model="answer"
-      class="tracking-widest text-2xl uppercase text-center p-4 mt-8 flex justify-center items-center shadow-sm border-blue-500 focus:border-blue-500 block w-full rounded-md"
-      placeholder=""
-    />
-  </form>
+  <div class="mt-8">
+    <form v-show="playing" ref="form" @submit.prevent="submit">
+      <input id="input" ref="input" type="text"
+        autofocus autocomplete="off"
+        :minlength="this.secretWord.length"  :maxlength="this.secretWord.length" v-model="answer"
+        class="tracking-widest text-2xl uppercase text-center p-4 justify-center items-center shadow-sm focus:outline-none border-blue-500 focus:border-blue-500 block w-full rounded-md"
+        placeholder=""
+      />
+    </form>
 
-  <div class="text-white">
-    <button @click="showHint" class="mt-4 text-sm text-underline text-blue-500 font-bold">Show hint</button>
-    <div v-if="needsHint">
-      <!-- <p class="text-small">{{ this.remainingLetters }}</p> -->
-      <!-- <p class="text-small">{{ definition }}</p> -->
-      <p class="text-small">{{ example }}</p>
+    <button v-show="!playing" @click="start"
+      type="button"
+      class="uppercase items-center text-center px-6 py-3 border border-transparent text-2xl font-medium w-full rounded-md shadow-sm text-blue-500 bg-white hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    Start
+    </button>
+  </div>
+
+  <div v-show="playing" class="mt-4">
+    <div class="flex md:justify-between">
+      <div class="flex space-x-2">
+        <span ref="timer" class="text-xs font-semibold py-1 px-5 flex uppercase rounded-full text-blue-500 bg-white text-center items-center justify-items-center">
+          {{ time }}
+        </span>
+
+        <button @click="quitGame" ref="timer" class="text-xs font-semibold py-1 px-3 flex uppercase rounded-full focus:outline-none text-red-900 bg-red-300 text-center items-center justify-items-center">
+          Quit
+        </button>
+      </div>
+      <div class="flex space-x-2">
+        <button @click="showHint" class="text-sm font-semibold inline-block py-1 px-3 focus:outline-none uppercase rounded-full text-yellow-700 bg-yellow-200">?</button>
+        <button @click="reveal" class="text-sm font-semibold  inline-block py-1 px-3 focus:outline-none uppercase rounded-full text-red-600 bg-red-100">!</button>
+      </div>
+    </div>
+
+    <div class="mt-4 text-white">
+      <div v-if="needsHint">
+        <!-- <p class="text-small">{{ this.remainingLetters }}</p> -->
+        <!-- <p class="text-small">{{ definition }}</p> -->
+        <p class="text-small">{{ example }}</p>
+      </div>
+      <p v-if="revealed" class="text-small">{{ this.secretWord }}</p>
     </div>
   </div>
 
-  <div class="text-white">
-    <button @click="reveal" class="mt-4 text-sm text-underline text-red-500 font-bold">Show answer</button>
-    <p v-if="revealed" class="text-small">{{ this.secretWord }}</p>
-  </div>
-
   <h2 v-show="isCorrect" class="text-white">CORRECT</h2>
+
+  <GameHistory :history="history" />
 
 </template>
 
 <script>
 import WordTile from './WordTile.vue'
 import { getDefinition } from '../Definition'
+import GameHistory from './GameHistory.vue'
 
 export default {
   components: {
@@ -54,17 +80,49 @@ export default {
   },
   data() {
     return {
+      playing: false,
       answer: '',
       answers: [],
       revealed: false,
       needsHint: false,
       definition: '',
       example: '',
-      synonyms: ''
+      synonyms: '',
+      history:[],
+      time: 0,
+      interval: null
     };
   },
 
   methods: {
+    start() {
+      this.playing = true
+      this.startTimer()
+    },
+    startTimer() {
+      this.interval = setInterval(this.incrementTime, 1000);
+    },
+    incrementTime() {
+      this.time = parseInt(this.time) + 1;
+    },
+    stopTimer() {
+
+    },
+    completedGame() {
+      this.stopTimer()
+      this.saveGameHistory()
+      this.reset()
+    },
+    quitGame() {
+      this.stopTimer()
+      this.reset()
+    },
+    reset() {
+
+    },
+    saveGameHistory() {
+
+    },
     reveal() {
       this.revealed = !this.revealed
     },
@@ -125,7 +183,11 @@ export default {
       return this.answers[this.answers.length - 1]
     },
     isCorrect() {
-      return this.lastGuess?.value.toUpperCase() === this.secretWord
+      const isCorrect = this.lastGuess?.value.toUpperCase() === this.secretWord
+      if (isCorrect){
+        this.endGame()
+      }
+      return isCorrect
     },
     remainingLetters() {
       const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
