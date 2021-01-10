@@ -71,8 +71,8 @@ export default {
     async showHint() {
       if (this.needsHint) return this.needsHint = false
       const result = await getDefinition(this.word)
-      this.definition = result.definition.replace(this.word,'')
-      this.example = result.example.replace(this.word,'')
+      this.definition = result.definition.replace(`${this.word}s`,'').replace(this.word,'')
+      this.example = result.example.replace(`${this.word}s`,'').replace(this.word,'')
       this.synonyms = result.synonyms
       this.needsHint = !this.needsHint
     },
