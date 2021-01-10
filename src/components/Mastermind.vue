@@ -18,25 +18,26 @@
 
   <form ref="form" @submit.prevent="submit">
     <input type="text" :minlength="this.secretWord.length"  :maxlength="this.secretWord.length" v-model="answer"
-      class="tracking-widest text-lg uppercase text-center p-4 mt-8 flex justify-center items-center shadow-sm border-blue-500 focus:border-blue-500 block w-full rounded-md"
+      class="tracking-widest text-2xl uppercase text-center p-4 mt-8 flex justify-center items-center shadow-sm border-blue-500 focus:border-blue-500 block w-full rounded-md"
       placeholder=""
     />
   </form>
 
-  <div>
+  <div class="text-white">
     <button @click="showHint" class="mt-4 text-sm text-underline text-blue-500 font-bold">Show hint</button>
     <div v-if="needsHint">
-      <p class="text-small">{{ this.remainingWords }}</p>
+      <!-- <p class="text-small">{{ this.remainingLetters }}</p> -->
+      <!-- <p class="text-small">{{ definition }}</p> -->
       <p class="text-small">{{ example }}</p>
     </div>
   </div>
 
-  <div>
+  <div class="text-white">
     <button @click="reveal" class="mt-4 text-sm text-underline text-red-500 font-bold">Show answer</button>
     <p v-if="revealed" class="text-small">{{ this.secretWord }}</p>
   </div>
 
-  <h2 v-show="isCorrect">CORRECT</h2>
+  <h2 v-show="isCorrect" class="text-white">CORRECT</h2>
 
 </template>
 
@@ -70,8 +71,8 @@ export default {
     async showHint() {
       if (this.needsHint) return this.needsHint = false
       const result = await getDefinition(this.word)
-      this.definition = result.definition.replace(this.word,'[word]')
-      this.example = result.example.replace(this.word,'[word]')
+      this.definition = result.definition.replace(this.word,'')
+      this.example = result.example.replace(this.word,'')
       this.synonyms = result.synonyms
       this.needsHint = !this.needsHint
     },
@@ -126,7 +127,7 @@ export default {
     isCorrect() {
       return this.lastGuess?.value.toUpperCase() === this.secretWord
     },
-    remainingWords() {
+    remainingLetters() {
       const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
       const used = this.answers.map(({characters}) => characters).flat()
 
