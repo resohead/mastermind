@@ -1,7 +1,7 @@
 <template>
-   <ul v-for="game in history" :key="game.id">
+   <ul v-for="game in history" :key="game.id" class="text-white">
        <li>
-           <span></span>
+           <span>{{ game.word }}, Completed: {{ game.completed }}</span>
            <span>{{ game.attempts }} in {{ game.time }} seconds</span>
        </li>
    </ul>
@@ -9,6 +9,7 @@
 
 <script>
 export default {
+    // id, word, success/fail, time, attempts
     props: {
         history: {type: Array, default: []},
     },

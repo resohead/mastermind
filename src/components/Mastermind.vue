@@ -67,19 +67,25 @@
 </template>
 
 <script>
+import Words from '../Words.js'
 import WordTile from './WordTile.vue'
 import { getDefinition } from '../Definition'
 import GameHistory from './GameHistory.vue'
 
 export default {
   components: {
-    WordTile
+    WordTile,
+    GameHistory
   },
   props: {
-    word: {type: String, default: ''},
+    // word: {type: String, default: ''},
+  },
+  beforeMount() {
+    this.getNewWord()
   },
   data() {
     return {
+      word: '',
       playing: false,
       answer: '',
       answers: [],
@@ -88,13 +94,16 @@ export default {
       definition: '',
       example: '',
       synonyms: '',
-      history:[],
+      history: [],
       time: 0,
       interval: null
     };
   },
 
   methods: {
+    getNewWord() {
+      this.word = Words[Math.floor(Math.random() * Words.length)]
+    },
     start() {
       this.playing = true
       this.startTimer()
@@ -106,22 +115,37 @@ export default {
       this.time = parseInt(this.time) + 1;
     },
     stopTimer() {
-
+      clearInterval(this.interval);
     },
     completedGame() {
+      this.saveGameHistory({
+        id: (new Date()).getTime(),
+        word: this.secretWord,
+        attempts: this.answers.length,
+        time: this.time,
+        completed: true,
+        })
       this.stopTimer()
-      this.saveGameHistory()
       this.reset()
     },
     quitGame() {
+      this.saveGameHistory({
+        id: (new Date()).getTime(),
+        word: this.secretWord,
+        attempts: this.answers.length,
+        time: this.time,
+        completed: false,
+        })
       this.stopTimer()
       this.reset()
     },
     reset() {
-
+      this.getNewWord()
+      this.answers = []
+      this.time = 0
     },
-    saveGameHistory() {
-
+    saveGameHistory(stats = {}) {
+      this.history.push(stats)
     },
     reveal() {
       this.revealed = !this.revealed
@@ -136,7 +160,6 @@ export default {
     },
     submit() {
       if (this.$refs.form.checkValidity()) {
-        console.log('submit')
         this.answers.push({id: this.answers.count, value: this.answer.toUpperCase(), characters: this.answer.toUpperCase().split('')})
         this.answer = ''
       } else {
@@ -168,11 +191,12 @@ export default {
   },
   watch: {
     word: async (newWord, oldWord) => {
-      console.log('getting definition...')
-      const result = await getDefinition(newWord)
-      this.definition = result.definition.replace(newWord,'[word]')
-      this.example = result.example.replace(newWord,'[word]')
-      this.synonyms = result.synonyms
+      // console.log('getting definition...' + newWord + ', ' + oldWord)
+      // let result = await getDefinition(newWord)
+      // console.log(result)
+      // this.definition = result.definition.replace(newWord,'[word]')
+      // this.example = result.example.replace(newWord,'[word]')
+      // this.synonyms = result.synonyms
     }
   },
   computed: {
@@ -185,7 +209,7 @@ export default {
     isCorrect() {
       const isCorrect = this.lastGuess?.value.toUpperCase() === this.secretWord
       if (isCorrect){
-        this.endGame()
+        this.completedGame()
       }
       return isCorrect
     },
