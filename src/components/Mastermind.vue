@@ -29,7 +29,10 @@
 
   <div>
     <button @click="showHint" class="mt-4 text-sm text-underline text-blue-500 font-bold">Show hint</button>
-    <p v-if="needsHint" class="text-small">{{ this.remainingWords }}</p>
+    <div v-if="needsHint">
+      <p class="text-small">{{ this.remainingWords }}</p>
+      <p class="text-small">{{ example }}</p>
+    </div>
   </div>
 
   <div>
@@ -43,6 +46,7 @@
 
 <script>
 import WordTile from './WordTile.vue'
+import { getDefinition } from '../Definition'
 
 export default {
   components: {
@@ -56,7 +60,10 @@ export default {
       answer: '',
       answers: [],
       revealed: false,
-      needsHint: false
+      needsHint: false,
+      definition: '',
+      example: '',
+      synonyms: ''
     };
   },
 
@@ -64,7 +71,12 @@ export default {
     reveal() {
       this.revealed = !this.revealed
     },
-    showHint() {
+    async showHint() {
+      if (this.needsHint) return this.needsHint = false
+      const result = await getDefinition(this.word)
+      this.definition = result.definition.replace(this.word,'[word]')
+      this.example = result.example.replace(this.word,'[word]')
+      this.synonyms = result.synonyms
       this.needsHint = !this.needsHint
     },
     submit() {
@@ -99,7 +111,15 @@ export default {
       return results
     }
   },
-
+  watch: {
+    word: async (newWord, oldWord) => {
+      console.log('getting definition...')
+      const result = await getDefinition(newWord)
+      this.definition = result.definition.replace(newWord,'[word]')
+      this.example = result.example.replace(newWord,'[word]')
+      this.synonyms = result.synonyms
+    }
+  },
   computed: {
     secretWord() {
       return this.word.toUpperCase()
